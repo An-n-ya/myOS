@@ -7,6 +7,10 @@ if [ -e "hd60M.img" ]; then
     rm -rf hd60M.img
 fi
 
+# 清除编译产物
+rm -f out/*.bin kernel/*.bin lib/kernel/*.o bochsout.txt
+
+
 # 编译
 nasm -I include/ -o ./out/mbr.bin ./boot/mbr.s
 
