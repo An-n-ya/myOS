@@ -110,3 +110,29 @@ put_char:
         popad
         ret
 
+;---------------- put_str --------------------------
+;put_str 通过put_char来打印以0字符结尾的字符串
+;---------------------------------------------------
+global put_str
+put_str:
+    ; 备份ebx 和 ecx两个寄存器
+    push    ebx
+    push    ecx
+    xor     ecx,    ecx             ; 清空ecx
+    mov     ebx,    [esp + 12]      ; 获取待打印的字符串地址
+    .go_on:
+        mov     cl,     [ebx]
+        cmp     cl,     0           ; 如果遇到 \0 就结束打印
+        jz      .str_over
+        push    ecx                 ; 保存ecx
+        call    put_char            ; 打印字符
+        add     esp,    4           ; 回收栈的空间，更新栈顶
+        inc     ebx                 ; 使得光标后移 
+        jmp     .go_on
+    .str_over:
+        pop     ecx
+        pop     ebx                 ; 还原ecx和ebx
+        ret
+
+
+
