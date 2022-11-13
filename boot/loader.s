@@ -22,58 +22,78 @@ SELECTOR_CODE 		equ	(0x0001<<3) + TI_GDT + RPL0
 SELECTOR_DATA 		equ	(0x0002<<3) + TI_GDT + RPL0
 SELECTOR_VIDEO		equ	(0x0003<<3) + TI_GDT + RPL0
 
-; 以下是 gdt 的指针，前 2 字节是 gdt 界限，后 4 字节是 gdt 起始地址
-gdt_ptr		dw	GDT_LIMIT
-			dd	GDT_BASE
-loadermsg	db	'2 loader in real.'
+; 内存大小，单位字节，此处的内存地址是0xb00
+total_memory_bytes dd 0
 
-;------------------------------------------------------------------------------
-loader_start:
-						; 打印字符串，INT 0x10中断，功能号：0x13
-						; 输入：
-						;	AH	子功能号	=	13H
-						;	BH				=	页码
-						;	BL				=	属性
-						;	CX				=	字符串长度
-						;	(DH, DL)		=	坐标(行，列)
-						;	ES:BP			=	字符串地址
-						;	AL				=	显示输出地址
-						;		0 ---- 字符串只含显示字符，显示后光标位置不变
-						;		1 ---- 字符串只含显示字符，显示后光标位置改变
-						;		2 ---- 字符串中含显示字符和显示属性，显示后光标位置不变		
-						;		3 ---- 字符串中含显示字符和显示属性，显示后光标位置改变		
-						; 输出：
-						; 	无
+gdt_ptr dw GDT_LIMIT
+        dd GDT_BASE
 
-	mov	sp,	LOADER_BASE_ADDR
-	mov	bp,	loadermsg
-	mov	cx,	17		;	字符串长度
-	mov ax,	0x1301	;	AH = 13h, AL = 01h
-	mov	bx,	0x001f
-	mov dx,	0x1800
-	int	0x10		; 	10h 号中断
-						
-; ;------------------------------------------------------------------------------
+ards_buf times 244 db 0
+ards_nr dw 0
 
-;---------------- 准备进入保护模式 ------------------
-; 分三步：
-;	1 打开A20
-;	2 加载gdt
-;	3 将cr0 的 pe 位置 1
+loader_start: 
 
-	;------------ 打开A20 -------------
-		in 	al, 0x92
-		or 	al, 0000_0010b
-		out 0x92, al
+    xor ebx, ebx
+    mov edx, 0x534d4150
+    mov di, ards_buf
 
-	;------------ 加载gdt -------------
-		lgdt	[gdt_ptr]
+.e820_mem_get_loop:
+    mov eax, 0x0000e820
+    mov ecx, 20
+    int 0x15
+    
+    jc .e820_mem_get_failed
+    
+    add di, cx
+    inc word [ards_nr]
+    cmp ebx, 0
+    jnz .e820_mem_get_loop
 
-	;------------ cr0 第 0 位置 1 ----------
-		mov	eax, cr0
-		or 	eax, 0x00000001
-		mov cr0, eax
-		jmp dword SELECTOR_CODE:p_mode_start
+    mov cx, [ards_nr]
+    mov ebx, ards_buf
+    xor edx, edx
+
+.find_max_mem_area:
+    mov eax, [ebx]
+    add eax, [ebx + 8]
+    add ebx, 20
+    cmp edx, eax
+    jge .next_ards
+    mov edx, eax
+
+.next_ards:
+    loop .find_max_mem_area
+    jmp .mem_get_ok
+
+.e820_mem_get_failed:
+    mov byte [gs:0], 'f'
+    mov byte [gs:2], 'a'
+    mov byte [gs:4], 'i'
+    mov byte [gs:6], 'l'
+    mov byte [gs:8], 'e'
+    mov byte [gs:10], 'd'
+    ; 内存检测失败，不再继续向下执行
+    jmp $
+
+.mem_get_ok:
+    mov [total_memory_bytes], edx
+
+    ; 开始进入保护模式
+    ; 打开A20地址线
+    in al, 0x92
+    or al, 00000010B
+    out 0x92, al
+
+    ; 加载gdt
+    lgdt [gdt_ptr]
+
+    ; cr0第0位置1
+    mov eax, cr0
+    or eax, 0x00000001
+    mov cr0, eax
+
+    ; 刷新流水线
+    jmp dword SELECTOR_CODE:p_mode_start
 
 [bits 32]
 p_mode_start:
@@ -101,13 +121,13 @@ sgdt [gdt_ptr]
 
 ; 将视频段的基址 + 0xc0000000
 mov ebx, [gdt_ptr + 2]  ; gdr_ptr的低2字节是GDT界限，高四字节是地址，因此这里要加2
-or dword [ebx + 0x18 + 4], 0xc000_0000
+or dword [ebx + 0x18 + 4], 0xc0000000
 
 ; 将 gdt 的基址加上 0xc0000000
-add dword [gdt_ptr + 2], 0xc000_0000
+add dword [gdt_ptr + 2], 0xc0000000
 
 ; 栈指针同样映射到内核地址
-add esp, 0xc000_0000
+add esp, 0xc0000000
 
 ; 把页目录地址赋给 cr3
 mov eax, PAGE_DIR_TABLE_POS
@@ -115,7 +135,7 @@ mov cr3, eax
 
 ; 打开cr0的pg位
 mov eax, cr0
-or eax, 0x8000_0000
+or eax, 0x80000000
 mov cr0, eax
 
 ; 重新加载 gdt
@@ -126,8 +146,6 @@ enter_kernel:
 	call 	kernel_init
 	mov		esp,		0xc009f000			; 栈底 更高位置为EBDA了
 	jmp		KERNEL_ENTRY_POINT				; 跳转到内核基址 (0xc0001500)
-
-mov byte [gs:320], 'V'
 
 jmp $
 
@@ -247,8 +265,8 @@ rd_disk_m_32:
 
 .go_on_read:
 	in ax, dx
-	mov [bx], ax
-	add bx, 2 			; 每读入2个字节，bx所指向的地址便+2
+	mov [ds:ebx], ax	; 这里和16位的不同
+	add ebx, 2 			; 每读入2个字节，bx所指向的地址便+2
 	loop .go_on_read
 	ret
 
