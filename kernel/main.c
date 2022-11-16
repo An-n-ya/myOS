@@ -1,19 +1,11 @@
 #include "kernel/print.h"
+#include "init.h"
+
 int main(void)
 {
-    put_char('k');
-    put_char('e');
-    put_char('r');
-    put_char('n');
-    put_char('e');
-    put_char('l');
-    put_char('\n');
-    put_char('1');
-    put_char('2');
-    put_char('\b');
-    put_char('3');
-    put_char('\n');
-    put_str("Hello world!");
+    put_str("I am kernel\n");
+    init_all();
+    asm volatile("sti"); // 在此临时开中断, 将eflags中的IF位置1
     while (1)
         ;
 }
