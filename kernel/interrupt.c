@@ -9,6 +9,10 @@
 #define PIC_M_DATA 0x21
 #define PIC_S_CTRL 0xa0
 #define PIC_S_DATA 0xal
+
+#define EFLAGS_IF 0x00000200
+#define GET_EFLAGS(EFLAG_VAR) asm volatile("pushfl; popl %0" \
+                                           : "=g"(EFLAG_VAR))
 /**
  *  中断门描述结构
  */
@@ -125,4 +129,52 @@ void idt_init()
                  :
                  : "m"(idt_operand));
     put_str("idt_init done\n");
+}
+
+// 关中断,并返回之前的状态
+enum intr_status intr_disable()
+{
+    enum intr_status old_status;
+    if (INTR_OFF == intr_get_status())
+    {
+        old_status = INTR_OFF;
+    }
+    else
+    {
+        old_status = INTR_ON;
+        asm volatile("cli;"
+                     :
+                     :
+                     : "memory");
+    }
+    return old_status;
+}
+// 开中断,并返回之前的状态
+enum intr_status intr_enable()
+{
+    enum intr_status old_status;
+    if (INTR_ON == intr_get_status())
+    {
+        old_status = INTR_ON;
+    }
+    else
+    {
+        old_status = INTR_OFF;
+        asm volatile("sti");
+    }
+    return old_status;
+}
+
+// 将中断设置为status
+enum intr_status intr_set_status(enum intr_status status)
+{
+    return status & INTR_ON ? intr_enable() : intr_disable();
+}
+
+// 获取中断状态
+enum intr_status intr_get_status()
+{
+    uint32_t eflags = 0; // eflags用来存储eflags的值
+    GET_EFLAGS(eflags);
+    return EFLAGS_IF & eflags ? INTR_ON : INTR_OFF;
 }
