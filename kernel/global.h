@@ -2,6 +2,8 @@
 #define __KERNEL_GLOBAL_H
 #include "../lib/stdint.h"
 
+#define NULL ((void *)0)
+
 #define RPL0 0
 #define RPL1 1
 #define RPL2 2

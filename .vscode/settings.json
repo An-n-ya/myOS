@@ -4,7 +4,9 @@
         "*.asm": "assembly",
         "*.s": "platformio-debug.asm",
         "print.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "string.h": "c",
+        "global.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
