@@ -9,7 +9,7 @@ ASFLAGS = -f elf
 ASIB = -I include/
 CFLAGS = -Wall -fno-stack-protector $(LIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -target i386-pc-linux-elf
 LDFLAGS = -m elf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)/kernel.map
-OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/print.o $(BUILD_DIR)/debug.o $(BUILD_DIR)/string.o $(BUILD_DIR)/bitmap.o
+OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/print.o $(BUILD_DIR)/debug.o $(BUILD_DIR)/string.o $(BUILD_DIR)/bitmap.o $(BUILD_DIR)/memory.o
 
 # C代码编译
 $(BUILD_DIR)/main.o: kernel/main.c lib/kernel/print.h lib/stdint.h kernel/init.h
@@ -28,6 +28,9 @@ $(BUILD_DIR)/string.o: lib/string.c lib/string.h lib/stdint.h kernel/global.h ke
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/bitmap.o: lib/kernel/bitmap.c lib/kernel/bitmap.h lib/stdint.h kernel/global.h kernel/debug.h lib/kernel/print.h kernel/interrupt.h lib/string.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/memory.o: kernel/memory.c kernel/memory.h lib/stdint.h lib/string.h lib/kernel/bitmap.h
 	$(CC) $(CFLAGS) $< -o $@
 
 # 编译loader和mbr
@@ -52,7 +55,8 @@ $(BUILD_DIR)/kernel.bin: $(OBJS)
 
 mk_dir:
 	if [ ! -d $(BUILD_DIR) ]; then mkdir $(BUILD_DIR); fi
-	# bximage -q -func=create -hd=60M -imgmode=flat ${IMG_NAME}
+	rm *.img
+	bximage -q -func=create -hd=60M -imgmode=flat ${IMG_NAME}
 	echo "Create image done."
 
 hd:
