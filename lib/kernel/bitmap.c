@@ -27,7 +27,7 @@ bool bitmap_scan_test(struct bitmap *btmp, uint32_t bit_idx)
 {
     uint32_t byte_idx = bit_idx / 8;
     uint32_t byte_res = bit_idx % 8;
-    return (btmp->bits[bit_idx] & (BITMAP_MASK << byte_res));
+    return (btmp->bits[byte_idx] & (BITMAP_MASK << byte_res));
 }
 
 /**
@@ -41,12 +41,51 @@ int bitmap_scan(struct bitmap *btmp, uint32_t cnt)
 {
     int bit_idx_start = -1;
     uint32_t bit_left = btmp->btmp_bytes_len * 8;
-    uint32_t count = 0; // 用于记录当前连续空闲的位的个数
+    uint32_t count = 0;   // 用于记录当前连续空闲的位的个数
+    uint32_t cur_bit = 0; // 当前位置
     while (bit_left-- > 0)
     {
+        if (!(bitmap_scan_test(btmp, cur_bit)))
+        {
+            // 当前位空闲，count加1
+            count++;
+        }
+        else
+        {
+            count = 0;
+        }
+
+        if (count == cnt)
+        {
+            // 如果找到连续个cnt空闲位了
+            // 直接返回开头地址
+            return cur_bit - cnt + 1;
+        }
+        cur_bit++;
     }
+    return bit_idx_start;
 }
 
+/**
+ * @brief 将btmp的bit_idx为置为value
+ *
+ * @param btmp
+ * @param bit_idx
+ * @param value
+ */
 void bitmap_set(struct bitmap *btmp, uint32_t bit_idx, int8_t value)
 {
+    // value应该是0或1
+    ASSERT((value == 1) || (value == 0));
+    uint32_t byte_idx = bit_idx / 8;
+    uint32_t byte_res = bit_idx % 8;
+
+    if (value)
+    { // 如果value为1
+        btmp->bits[byte_idx] |= (BITMAP_MASK << byte_res);
+    }
+    else
+    { // 如果value为0
+        btmp->bits[byte_idx] &= ~(BITMAP_MASK << byte_res);
+    }
 }
