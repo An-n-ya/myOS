@@ -1,104 +1,115 @@
-#include "list.h"
-#include "../../kernel/interrupt.h"
+# include "list.h"
+# include "interrupt.h"
 
-// 初始化链表
-void list_init(struct list *list)
-{
+/**
+ * 链表初始化.
+ */
+void list_init(struct list* list) {
     list->head.prev = NULL;
     list->head.next = &list->tail;
-    list->tail.prev = &list->head;
     list->tail.next = NULL;
+    list->tail.prev = &list->head;
 }
-// 在给定链表元素前添加元素
-void list_insert_before(struct list_elem *before, struct list_elem *elem)
-{
+
+/**
+ * 在before前插入节点elem.
+ */
+void list_insert_before(struct list_elem* before, struct list_elem* elem) {
     enum intr_status old_status = intr_disable();
+
     before->prev->next = elem;
+    elem->prev = before->prev;
+    elem->next = before;
+
+    before->prev = elem;
+
     intr_set_status(old_status);
 }
 
-// 添加元素到队首
-void list_push(struct list *plist, struct list_elem *elem)
-{
-    list_insert_before(plist->head.next, elem);
+/**
+ * 将给定的元素添加至链表队首.
+ */
+void list_push(struct list* list, struct list_elem* elem) {
+    list_insert_before(list->head.next, elem);
 }
 
-// 添加元素到队尾
-void list_append(struct list *plist, struct list_elem *elem)
-{
-    list_insert_before(&plist->tail, elem);
+/**
+ * 将给定的元素添加至链表队尾.
+ */
+void list_append(struct list* list, struct list_elem* elem) {
+    list_insert_before(&list->tail, elem);
 }
 
-// 删除给定链表元素
-void list_remove(struct list_elem *pelem)
-{
+/**
+ * 将指定的元素从其链表中脱离.
+ */
+void list_remove(struct list_elem* elem) {
     enum intr_status old_status = intr_disable();
 
-    pelem->next->prev = pelem->prev;
-    pelem->prev->next = pelem->next;
+    elem->prev->next = elem->next;
+    elem->next->prev = elem->prev;
 
     intr_set_status(old_status);
 }
 
-// 将链表第一个元素删除，并返回
-struct list_elem *list_pop(struct list *plist)
-{
-    struct list_elem *res = plist->head.next;
-    list_remove(res);
-    return res;
+/**
+ * 弹出第一个元素.
+ */
+struct list_elem* list_pop(struct list* list) {
+    struct list_elem* result = list->head.next;
+
+    list_remove(result);
+
+    return result;
 }
 
-// 判断链表是否为空
-bool list_empty(struct list *plist)
-{
-    return plist->head.next == &plist->tail ? true : false;
-}
+/**
+ * 链表查找.
+ */
+int list_find(struct list* list, struct list_elem* elem) {
+    struct list_elem* e = list->head.next;
 
-// 给出链表长度
-uint32_t list_len(struct list *plist)
-{
-    uint32_t cnt = 0;
-    struct list_elem *cur = plist->head.next;
-    while (cur != &plist->tail)
-    {
-        cur = cur->next;
-        cnt += 1;
+    while (e != &list->tail) {
+        if (e == elem) {
+            return 1;
+        }
+        e = e->next;
     }
 
-    return cnt;
+    return 0;
 }
 
-struct list_elem *list_traversal(struct list *plist, function func, int arg)
-{
-    struct list_elem *elem = plist->head.next;
-    if (list_empty(plist))
-    {
+int list_empty(struct list* list) {
+    return (list->head.next == &list->tail ? 1 : 0);
+}
+
+uint32_t list_length(struct list* list) {
+    struct list_elem* e = list->head.next;
+    uint32_t length = 0;
+
+    while (e != &list->tail) {
+        ++length;
+        e = e->next;
+    }
+
+    return length;
+}
+
+/**
+ * 遍历链表，将链表元素和参数arg传给函数func，如果返回1，那么返回当前元素.
+ */
+struct list_elem* list_traversal(struct list* list, function func, int arg) {
+    if (list_empty(list)) {
         return NULL;
     }
 
-    while (elem != &plist->tail)
-    {
-        if (func(elem, arg))
-        {
-            return elem;
+    struct list_elem* e = list->head.next;
+    while (e != &list->tail) {
+        if (func(e, arg)) {
+            return e;
         }
-        elem = elem->next;
+        e = e->next;
     }
 
     return NULL;
-}
-
-// 从链表中找到目标节点
-bool elem_find(struct list *plist, struct list_elem *obj_elem)
-{
-    struct list_elem *cur = plist->head.next;
-    while (cur != &plist->tail)
-    {
-        if (cur == obj_elem)
-        {
-            return true;
-        }
-        cur = cur->next;
-    }
-    return false;
 }

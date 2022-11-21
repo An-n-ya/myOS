@@ -1,6 +1,6 @@
 #include "io.h"
 #include "kernel/print.h"
-#include "interrupt.h"
+#include "../kernel/interrupt.h"
 #include "../kernel/thread/thread.h"
 #include "debug.h"
 
@@ -33,14 +33,14 @@ static void intr_timer_handler(void)
 {
     struct task_struct *cur_thread = running_thread();
 
-    ASSERT(cur_thread->stack_magic == 0x77777777);
+    ASSERT(cur_thread->stack_magic == 0x19720518); // 检查魔数，看是否溢出
 
     cur_thread->elapsed_ticks++;
     ticks++;
 
     if (cur_thread->ticks == 0)
     {
-        // schedule();
+         schedule();
     }
     else
     {
@@ -55,6 +55,7 @@ void timer_init()
 {
     put_str("timer_init start.\n");
     frequency_set(COUNTER0_PORT, COUNTER0_NO, READ_WRITE_LATCH, COUNTER_MODE, COUNTER0_VALUE);
-    // register_handler(0x20, intr_timer_handler);
+    // 时钟中断
+    register_handler(0x20, intr_timer_handler);
     put_str("timer_init done.\n");
 }
