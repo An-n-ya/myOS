@@ -2,6 +2,7 @@
 #define __THREAD_THREAD_H
 
 #include "../../lib/stdint.h"
+#include "../../lib/kernel/list.h"
 
 // 通用函数类型
 typedef void thread_func(void *);
@@ -72,8 +73,16 @@ struct task_struct
 {
     uint32_t *self_kstack;
     enum task_status status;
-    uint8_t priority; // 线程优先级
     char name[16];
+    uint8_t priority; // 线程优先级
+    uint8_t ticks;    // 每次在处理器上执行的cpu时间
+
+    uint32_t elapsed_ticks; // 自上一次cpu运行后过去了多少cpu时间
+
+    struct list_elem general_tag; // 线程在一般队列中节点
+    struct list_elem all_list_tag;
+
+    uint32_t *pgdir;      // 栈的边界标记
     uint32_t stack_magic; // 栈的边界标记，用于检测栈溢出
 };
 

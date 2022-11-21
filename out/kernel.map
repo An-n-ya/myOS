@@ -28,6 +28,9 @@ Discarded input sections
  .note.GNU-stack
                 0x0000000000000000        0x0 out/list.o
  .llvm_addrsig  0x0000000000000000        0x5 out/list.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/timer.o
+ .llvm_addrsig  0x0000000000000000        0x3 out/timer.o
 
 Memory Configuration
 
@@ -48,6 +51,7 @@ LOAD out/bitmap.o
 LOAD out/memory.o
 LOAD out/thread.o
 LOAD out/list.o
+LOAD out/timer.o
                 [!provide]                        PROVIDE (__executable_start = SEGMENT_START ("text-segment", 0x8048000))
                 0x0000000008048094                . = (SEGMENT_START ("text-segment", 0x8048000) + SIZEOF_HEADERS)
 
@@ -118,7 +122,7 @@ LOAD out/list.o
 .plt.sec
  *(.plt.sec)
 
-.text           0x00000000c0001500     0x1deb
+.text           0x00000000c0001500     0x1ef4
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -188,6 +192,9 @@ LOAD out/list.o
                 0x00000000c00031a0                list_len
                 0x00000000c00031f0                list_traversal
                 0x00000000c0003290                elem_find
+ *fill*         0x00000000c00032eb        0x5 
+ .text          0x00000000c00032f0      0x104 out/timer.o
+                0x00000000c00032f0                timer_init
  *(.gnu.warning)
 
 .fini
@@ -196,24 +203,26 @@ LOAD out/list.o
                 [!provide]                        PROVIDE (_etext = .)
                 [!provide]                        PROVIDE (etext = .)
 
-.rodata         0x00000000c00032eb      0x4b9
+.rodata         0x00000000c00033f4      0x4de
  *(.rodata .rodata.* .gnu.linkonce.r.*)
  .rodata.str1.1
-                0x00000000c00032eb       0x1e out/main.o
+                0x00000000c00033f4       0x1e out/main.o
  .rodata.str1.1
-                0x00000000c0003309        0xa out/init.o
+                0x00000000c0003412        0xa out/init.o
  .rodata.str1.1
-                0x00000000c0003313      0x261 out/interrupt.o
+                0x00000000c000341c      0x261 out/interrupt.o
  .rodata.str1.1
-                0x00000000c0003574       0x3f out/debug.o
+                0x00000000c000367d       0x3f out/debug.o
                                          0x41 (size before relaxing)
  .rodata.str1.1
-                0x00000000c00035b3       0xa2 out/string.o
+                0x00000000c00036bc       0xa2 out/string.o
  .rodata.str1.1
-                0x00000000c0003655       0x3c out/bitmap.o
+                0x00000000c000375e       0x3c out/bitmap.o
  .rodata.str1.1
-                0x00000000c0003691      0x113 out/memory.o
+                0x00000000c000379a      0x113 out/memory.o
                                         0x115 (size before relaxing)
+ .rodata.str1.1
+                0x00000000c00038ad       0x25 out/timer.o
 
 .rodata1
  *(.rodata1)
@@ -222,25 +231,27 @@ LOAD out/list.o
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0x00000000c00037a4      0x698
+.eh_frame       0x00000000c00038d4      0x6f8
  *(.eh_frame)
- .eh_frame      0x00000000c00037a4       0x50 out/main.o
- .eh_frame      0x00000000c00037f4       0x20 out/init.o
+ .eh_frame      0x00000000c00038d4       0x50 out/main.o
+ .eh_frame      0x00000000c0003924       0x20 out/init.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c0003814      0x160 out/interrupt.o
+ .eh_frame      0x00000000c0003944      0x160 out/interrupt.o
                                         0x178 (size before relaxing)
- .eh_frame      0x00000000c0003974       0x1c out/debug.o
+ .eh_frame      0x00000000c0003aa4       0x1c out/debug.o
                                          0x34 (size before relaxing)
- .eh_frame      0x00000000c0003990      0x148 out/string.o
+ .eh_frame      0x00000000c0003ac0      0x148 out/string.o
                                         0x160 (size before relaxing)
- .eh_frame      0x00000000c0003ad8       0x84 out/bitmap.o
+ .eh_frame      0x00000000c0003c08       0x84 out/bitmap.o
                                          0x9c (size before relaxing)
- .eh_frame      0x00000000c0003b5c      0x120 out/memory.o
+ .eh_frame      0x00000000c0003c8c      0x120 out/memory.o
                                         0x138 (size before relaxing)
- .eh_frame      0x00000000c0003c7c       0x80 out/thread.o
+ .eh_frame      0x00000000c0003dac       0x80 out/thread.o
                                          0x98 (size before relaxing)
- .eh_frame      0x00000000c0003cfc      0x140 out/list.o
+ .eh_frame      0x00000000c0003e2c      0x140 out/list.o
                                         0x158 (size before relaxing)
+ .eh_frame      0x00000000c0003f6c       0x60 out/timer.o
+                                         0x78 (size before relaxing)
  *(.eh_frame.*)
 
 .gcc_except_table
@@ -341,7 +352,7 @@ LOAD out/list.o
                 0x00000000c00040a0                . = .
                 0x00000000c00040a0                __bss_start = .
 
-.bss            0x00000000c00040a0      0x23c
+.bss            0x00000000c00040a0      0x240
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
  .bss           0x00000000c00040a0      0x210 out/interrupt.o
@@ -351,14 +362,16 @@ LOAD out/list.o
                 0x00000000c00042b0                kernel_pool
                 0x00000000c00042c0                user_pool
                 0x00000000c00042d0                kernel_vaddr
+ .bss           0x00000000c00042dc        0x4 out/timer.o
+                0x00000000c00042dc                ticks
  *(COMMON)
-                0x00000000c00042dc                . = ALIGN ((. != 0x0)?0x4:0x1)
-                0x00000000c00042dc                . = ALIGN (0x4)
-                0x00000000c00042dc                . = SEGMENT_START ("ldata-segment", .)
-                0x00000000c00042dc                . = ALIGN (0x4)
-                0x00000000c00042dc                _end = .
+                0x00000000c00042e0                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x00000000c00042e0                . = ALIGN (0x4)
+                0x00000000c00042e0                . = SEGMENT_START ("ldata-segment", .)
+                0x00000000c00042e0                . = ALIGN (0x4)
+                0x00000000c00042e0                _end = .
                 [!provide]                        PROVIDE (end = .)
-                0x00000000c00042dc                . = DATA_SEGMENT_END (.)
+                0x00000000c00042e0                . = DATA_SEGMENT_END (.)
 
 .stab
  *(.stab)
@@ -390,6 +403,7 @@ LOAD out/list.o
  .comment       0x0000000000000031       0x32 out/memory.o
  .comment       0x0000000000000031       0x32 out/thread.o
  .comment       0x0000000000000031       0x32 out/list.o
+ .comment       0x0000000000000031       0x32 out/timer.o
 
 .gnu.build.attributes
  *(.gnu.build.attributes .gnu.build.attributes.*)
