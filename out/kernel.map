@@ -24,7 +24,7 @@ Discarded input sections
  .llvm_addrsig  0x0000000000000000       0x11 out/memory.o
  .note.GNU-stack
                 0x0000000000000000        0x0 out/thread.o
- .llvm_addrsig  0x0000000000000000        0x6 out/thread.o
+ .llvm_addrsig  0x0000000000000000        0xd out/thread.o
  .note.GNU-stack
                 0x0000000000000000        0x0 out/list.o
  .llvm_addrsig  0x0000000000000000        0x5 out/list.o
@@ -122,7 +122,7 @@ LOAD out/timer.o
 .plt.sec
  *(.plt.sec)
 
-.text           0x00000000c0001500     0x1ef4
+.text           0x00000000c0001500     0x2014
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -178,23 +178,24 @@ LOAD out/timer.o
                 0x00000000c0002aa0                pde_ptr
                 0x00000000c0002ad0                malloc_page
                 0x00000000c0002e60                get_kernel_pages
- .text          0x00000000c0002eb0      0x18c out/thread.o
-                0x00000000c0002eb0                thread_start
- *fill*         0x00000000c000303c        0x4 
- .text          0x00000000c0003040      0x2ab out/list.o
-                0x00000000c0003040                list_init
-                0x00000000c0003070                list_insert_before
-                0x00000000c00030a0                list_push
-                0x00000000c00030d0                list_append
-                0x00000000c0003100                list_remove
-                0x00000000c0003140                list_pop
-                0x00000000c0003170                list_empty
-                0x00000000c00031a0                list_len
-                0x00000000c00031f0                list_traversal
-                0x00000000c0003290                elem_find
- *fill*         0x00000000c00032eb        0x5 
- .text          0x00000000c00032f0      0x104 out/timer.o
-                0x00000000c00032f0                timer_init
+ .text          0x00000000c0002eb0      0x2a1 out/thread.o
+                0x00000000c0002eb0                running_thread
+                0x00000000c0002ed0                thread_start
+ *fill*         0x00000000c0003151        0xf 
+ .text          0x00000000c0003160      0x2ab out/list.o
+                0x00000000c0003160                list_init
+                0x00000000c0003190                list_insert_before
+                0x00000000c00031c0                list_push
+                0x00000000c00031f0                list_append
+                0x00000000c0003220                list_remove
+                0x00000000c0003260                list_pop
+                0x00000000c0003290                list_empty
+                0x00000000c00032c0                list_len
+                0x00000000c0003310                list_traversal
+                0x00000000c00033b0                elem_find
+ *fill*         0x00000000c000340b        0x5 
+ .text          0x00000000c0003410      0x104 out/timer.o
+                0x00000000c0003410                timer_init
  *(.gnu.warning)
 
 .fini
@@ -203,26 +204,28 @@ LOAD out/timer.o
                 [!provide]                        PROVIDE (_etext = .)
                 [!provide]                        PROVIDE (etext = .)
 
-.rodata         0x00000000c00033f4      0x4de
+.rodata         0x00000000c0003514      0x56b
  *(.rodata .rodata.* .gnu.linkonce.r.*)
  .rodata.str1.1
-                0x00000000c00033f4       0x1e out/main.o
+                0x00000000c0003514       0x1e out/main.o
  .rodata.str1.1
-                0x00000000c0003412        0xa out/init.o
+                0x00000000c0003532        0xa out/init.o
  .rodata.str1.1
-                0x00000000c000341c      0x261 out/interrupt.o
+                0x00000000c000353c      0x261 out/interrupt.o
  .rodata.str1.1
-                0x00000000c000367d       0x3f out/debug.o
+                0x00000000c000379d       0x3f out/debug.o
                                          0x41 (size before relaxing)
  .rodata.str1.1
-                0x00000000c00036bc       0xa2 out/string.o
+                0x00000000c00037dc       0xa2 out/string.o
  .rodata.str1.1
-                0x00000000c000375e       0x3c out/bitmap.o
+                0x00000000c000387e       0x3c out/bitmap.o
  .rodata.str1.1
-                0x00000000c000379a      0x113 out/memory.o
+                0x00000000c00038ba      0x113 out/memory.o
                                         0x115 (size before relaxing)
  .rodata.str1.1
-                0x00000000c00038ad       0x25 out/timer.o
+                0x00000000c00039cd       0x8d out/thread.o
+ .rodata.str1.1
+                0x00000000c0003a5a       0x25 out/timer.o
 
 .rodata1
  *(.rodata1)
@@ -231,26 +234,26 @@ LOAD out/timer.o
  *(.eh_frame_hdr)
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0x00000000c00038d4      0x6f8
+.eh_frame       0x00000000c0003a80      0x718
  *(.eh_frame)
- .eh_frame      0x00000000c00038d4       0x50 out/main.o
- .eh_frame      0x00000000c0003924       0x20 out/init.o
+ .eh_frame      0x00000000c0003a80       0x50 out/main.o
+ .eh_frame      0x00000000c0003ad0       0x20 out/init.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000c0003944      0x160 out/interrupt.o
+ .eh_frame      0x00000000c0003af0      0x160 out/interrupt.o
                                         0x178 (size before relaxing)
- .eh_frame      0x00000000c0003aa4       0x1c out/debug.o
+ .eh_frame      0x00000000c0003c50       0x1c out/debug.o
                                          0x34 (size before relaxing)
- .eh_frame      0x00000000c0003ac0      0x148 out/string.o
+ .eh_frame      0x00000000c0003c6c      0x148 out/string.o
                                         0x160 (size before relaxing)
- .eh_frame      0x00000000c0003c08       0x84 out/bitmap.o
+ .eh_frame      0x00000000c0003db4       0x84 out/bitmap.o
                                          0x9c (size before relaxing)
- .eh_frame      0x00000000c0003c8c      0x120 out/memory.o
+ .eh_frame      0x00000000c0003e38      0x120 out/memory.o
                                         0x138 (size before relaxing)
- .eh_frame      0x00000000c0003dac       0x80 out/thread.o
-                                         0x98 (size before relaxing)
- .eh_frame      0x00000000c0003e2c      0x140 out/list.o
+ .eh_frame      0x00000000c0003f58       0xa0 out/thread.o
+                                         0xb8 (size before relaxing)
+ .eh_frame      0x00000000c0003ff8      0x140 out/list.o
                                         0x158 (size before relaxing)
- .eh_frame      0x00000000c0003f6c       0x60 out/timer.o
+ .eh_frame      0x00000000c0004138       0x60 out/timer.o
                                          0x78 (size before relaxing)
  *(.eh_frame.*)
 
@@ -262,7 +265,7 @@ LOAD out/timer.o
 
 .exception_ranges
  *(.exception_ranges*)
-                0x00000000c0004000                . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
+                0x00000000c0005198                . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
 
 .eh_frame
  *(.eh_frame)
@@ -277,7 +280,7 @@ LOAD out/timer.o
 .exception_ranges
  *(.exception_ranges*)
 
-.tdata          0x00000000c0004000        0x0
+.tdata          0x00000000c0005198        0x0
                 [!provide]                        PROVIDE (__tdata_start = .)
  *(.tdata .tdata.* .gnu.linkonce.td.*)
 
@@ -285,18 +288,18 @@ LOAD out/timer.o
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0x00000000c0004000        0x0
+.preinit_array  0x00000000c0005198        0x0
                 [!provide]                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end = .)
 
-.init_array     0x00000000c0004000        0x0
+.init_array     0x00000000c0005198        0x0
                 [!provide]                        PROVIDE (__init_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
                 [!provide]                        PROVIDE (__init_array_end = .)
 
-.fini_array     0x00000000c0004000        0x0
+.fini_array     0x00000000c0005198        0x0
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -326,52 +329,56 @@ LOAD out/timer.o
 .dynamic
  *(.dynamic)
 
-.got            0x00000000c0004000        0x0
+.got            0x00000000c0005198        0x0
  *(.got)
- .got           0x00000000c0004000        0x0 out/main.o
+ .got           0x00000000c0005198        0x0 out/main.o
  *(.igot)
-                0x00000000c0004000                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
+                0x00000000c0005198                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
 
-.got.plt        0x00000000c0004000        0x0
+.got.plt        0x00000000c0005198        0x0
  *(.got.plt)
- .got.plt       0x00000000c0004000        0x0 out/main.o
+ .got.plt       0x00000000c0005198        0x0 out/main.o
  *(.igot.plt)
- .igot.plt      0x00000000c0004000        0x0 out/main.o
+ .igot.plt      0x00000000c0005198        0x0 out/main.o
 
-.data           0x00000000c0004000       0xa0
+.data           0x00000000c0005198       0xa0
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x00000000c0004000       0x96 out/kernel.o
-                0x00000000c0004012                intr_entry_table
- *fill*         0x00000000c0004096        0x2 
- .data          0x00000000c0004098        0x8 out/print.o
+ .data          0x00000000c0005198       0x96 out/kernel.o
+                0x00000000c00051aa                intr_entry_table
+ *fill*         0x00000000c000522e        0x2 
+ .data          0x00000000c0005230        0x8 out/print.o
 
 .data1
  *(.data1)
-                0x00000000c00040a0                _edata = .
+                0x00000000c0005238                _edata = .
                 [!provide]                        PROVIDE (edata = .)
-                0x00000000c00040a0                . = .
-                0x00000000c00040a0                __bss_start = .
+                0x00000000c0005238                . = .
+                0x00000000c0005238                __bss_start = .
 
-.bss            0x00000000c00040a0      0x240
+.bss            0x00000000c0005238      0x264
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x00000000c00040a0      0x210 out/interrupt.o
-                0x00000000c00041a8                intr_name
-                0x00000000c000422c                idt_table
- .bss           0x00000000c00042b0       0x2c out/memory.o
-                0x00000000c00042b0                kernel_pool
-                0x00000000c00042c0                user_pool
-                0x00000000c00042d0                kernel_vaddr
- .bss           0x00000000c00042dc        0x4 out/timer.o
-                0x00000000c00042dc                ticks
+ .bss           0x00000000c0005238      0x210 out/interrupt.o
+                0x00000000c0005340                intr_name
+                0x00000000c00053c4                idt_table
+ .bss           0x00000000c0005448       0x2c out/memory.o
+                0x00000000c0005448                kernel_pool
+                0x00000000c0005458                user_pool
+                0x00000000c0005468                kernel_vaddr
+ .bss           0x00000000c0005474       0x24 out/thread.o
+                0x00000000c0005474                thread_ready_list
+                0x00000000c0005484                thread_all_list
+                0x00000000c0005494                main_thread
+ .bss           0x00000000c0005498        0x4 out/timer.o
+                0x00000000c0005498                ticks
  *(COMMON)
-                0x00000000c00042e0                . = ALIGN ((. != 0x0)?0x4:0x1)
-                0x00000000c00042e0                . = ALIGN (0x4)
-                0x00000000c00042e0                . = SEGMENT_START ("ldata-segment", .)
-                0x00000000c00042e0                . = ALIGN (0x4)
-                0x00000000c00042e0                _end = .
+                0x00000000c000549c                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x00000000c000549c                . = ALIGN (0x4)
+                0x00000000c000549c                . = SEGMENT_START ("ldata-segment", .)
+                0x00000000c000549c                . = ALIGN (0x4)
+                0x00000000c000549c                _end = .
                 [!provide]                        PROVIDE (end = .)
-                0x00000000c00042e0                . = DATA_SEGMENT_END (.)
+                0x00000000c000549c                . = DATA_SEGMENT_END (.)
 
 .stab
  *(.stab)
