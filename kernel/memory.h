@@ -33,10 +33,7 @@ extern struct pool kernel_pool, user_pool;
 void mem_init(void);
 void *get_kernel_pages(uint32_t pg_cnt);
 void *malloc_page(enum pool_flags pf, uint32_t pg_cnt);
-static void page_table_add(void *_vaddr, void *_page_phyaddr);
-static void *palloc(struct pool *m_pool);
 uint32_t *pde_ptr(uint32_t vaddr);
 uint32_t *pte_ptr(uint32_t vaddr);
-static void *vaddr_get(enum pool_flags pf, uint32_t pg_cnt);
 
 #endif
