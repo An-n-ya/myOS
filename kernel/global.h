@@ -29,7 +29,7 @@
 
 typedef enum
 {
-    ture = 1,
+    true = 1,
     false = 0
 } bool;
 #endif

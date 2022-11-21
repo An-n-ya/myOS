@@ -1,0 +1,485 @@
+
+Discarded input sections
+
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/main.o
+ .llvm_addrsig  0x0000000000000000        0x4 out/main.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/init.o
+ .llvm_addrsig  0x0000000000000000        0x3 out/init.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/interrupt.o
+ .llvm_addrsig  0x0000000000000000       0x10 out/interrupt.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/debug.o
+ .llvm_addrsig  0x0000000000000000        0x3 out/debug.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/string.o
+ .llvm_addrsig  0x0000000000000000        0x1 out/string.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/bitmap.o
+ .llvm_addrsig  0x0000000000000000        0x3 out/bitmap.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/memory.o
+ .llvm_addrsig  0x0000000000000000       0x11 out/memory.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/thread.o
+ .llvm_addrsig  0x0000000000000000        0x6 out/thread.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 out/list.o
+ .llvm_addrsig  0x0000000000000000        0x5 out/list.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+Address of section .text set to 0xc0001500
+LOAD out/main.o
+LOAD out/init.o
+LOAD out/interrupt.o
+LOAD out/kernel.o
+LOAD out/print.o
+LOAD out/debug.o
+LOAD out/string.o
+LOAD out/bitmap.o
+LOAD out/memory.o
+LOAD out/thread.o
+LOAD out/list.o
+                [!provide]                        PROVIDE (__executable_start = SEGMENT_START ("text-segment", 0x8048000))
+                0x0000000008048094                . = (SEGMENT_START ("text-segment", 0x8048000) + SIZEOF_HEADERS)
+
+.interp
+ *(.interp)
+
+.note.gnu.build-id
+ *(.note.gnu.build-id)
+
+.hash
+ *(.hash)
+
+.gnu.hash
+ *(.gnu.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.dyn        0x0000000008048094        0x0
+ *(.rel.init)
+ *(.rel.text .rel.text.* .rel.gnu.linkonce.t.*)
+ *(.rel.fini)
+ *(.rel.rodata .rel.rodata.* .rel.gnu.linkonce.r.*)
+ *(.rel.data.rel.ro .rel.data.rel.ro.* .rel.gnu.linkonce.d.rel.ro.*)
+ *(.rel.data .rel.data.* .rel.gnu.linkonce.d.*)
+ *(.rel.tdata .rel.tdata.* .rel.gnu.linkonce.td.*)
+ *(.rel.tbss .rel.tbss.* .rel.gnu.linkonce.tb.*)
+ *(.rel.ctors)
+ *(.rel.dtors)
+ *(.rel.got)
+ .rel.got       0x0000000008048094        0x0 out/main.o
+ *(.rel.bss .rel.bss.* .rel.gnu.linkonce.b.*)
+ *(.rel.ifunc)
+
+.rel.plt        0x0000000008048094        0x0
+ *(.rel.plt)
+                [!provide]                        PROVIDE (__rel_iplt_start = .)
+ *(.rel.iplt)
+ .rel.iplt      0x0000000008048094        0x0 out/main.o
+                [!provide]                        PROVIDE (__rel_iplt_end = .)
+
+.relr.dyn
+ *(.relr.dyn)
+
+.init
+ *(SORT_NONE(.init))
+
+.plt            0x0000000008048094        0x0
+ *(.plt)
+ *(.iplt)
+ .iplt          0x0000000008048094        0x0 out/main.o
+
+.plt.got
+ *(.plt.got)
+
+.plt.sec
+ *(.plt.sec)
+
+.text           0x00000000c0001500     0x1deb
+ *(.text.unlikely .text.*_unlikely .text.unlikely.*)
+ *(.text.exit .text.exit.*)
+ *(.text.startup .text.startup.*)
+ *(.text.hot .text.hot.*)
+ *(SORT_BY_NAME(.text.sorted.*))
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ .text          0x00000000c0001500       0x6f out/main.o
+                0x00000000c0001500                main
+                0x00000000c0001550                k_thread_a
+ *fill*         0x00000000c000156f        0x1 
+ .text          0x00000000c0001570       0x23 out/init.o
+                0x00000000c0001570                init_all
+ *fill*         0x00000000c0001593        0xd 
+ .text          0x00000000c00015a0      0x494 out/interrupt.o
+                0x00000000c00015a0                idt_init
+                0x00000000c0001870                intr_disable
+                0x00000000c00018b0                intr_get_status
+                0x00000000c00018e0                intr_enable
+                0x00000000c0001920                intr_set_status
+ *fill*         0x00000000c0001a34        0xc 
+ .text          0x00000000c0001a40      0x39d out/kernel.o
+                0x00000000c0001a40                intr_exit
+ *fill*         0x00000000c0001ddd        0x3 
+ .text          0x00000000c0001de0      0x14e out/print.o
+                0x00000000c0001de0                put_int
+                0x00000000c0001e43                put_str
+                0x00000000c0001e61                put_char
+ *fill*         0x00000000c0001f2e        0x2 
+ .text          0x00000000c0001f30       0xc6 out/debug.o
+                0x00000000c0001f30                panic_spin
+ *fill*         0x00000000c0001ff6        0xa 
+ .text          0x00000000c0002000      0x662 out/string.o
+                0x00000000c0002000                memset
+                0x00000000c0002080                memcpy
+                0x00000000c0002110                memcmp
+                0x00000000c00021f0                strcpy
+                0x00000000c0002280                strlen
+                0x00000000c0002300                strcmp
+                0x00000000c00023f0                strchr
+                0x00000000c0002490                strrchr
+                0x00000000c0002520                strcat
+                0x00000000c00025d0                strchrs
+ *fill*         0x00000000c0002662        0xe 
+ .text          0x00000000c0002670      0x1db out/bitmap.o
+                0x00000000c0002670                bitmap_init
+                0x00000000c00026a0                bitmap_scan_test
+                0x00000000c00026e0                bitmap_scan
+                0x00000000c0002790                bitmap_set
+ *fill*         0x00000000c000284b        0x5 
+ .text          0x00000000c0002850      0x660 out/memory.o
+                0x00000000c0002850                mem_init
+                0x00000000c0002a60                pte_ptr
+                0x00000000c0002aa0                pde_ptr
+                0x00000000c0002ad0                malloc_page
+                0x00000000c0002e60                get_kernel_pages
+ .text          0x00000000c0002eb0      0x18c out/thread.o
+                0x00000000c0002eb0                thread_start
+ *fill*         0x00000000c000303c        0x4 
+ .text          0x00000000c0003040      0x2ab out/list.o
+                0x00000000c0003040                list_init
+                0x00000000c0003070                list_insert_before
+                0x00000000c00030a0                list_push
+                0x00000000c00030d0                list_append
+                0x00000000c0003100                list_remove
+                0x00000000c0003140                list_pop
+                0x00000000c0003170                list_empty
+                0x00000000c00031a0                list_len
+                0x00000000c00031f0                list_traversal
+                0x00000000c0003290                elem_find
+ *(.gnu.warning)
+
+.fini
+ *(SORT_NONE(.fini))
+                [!provide]                        PROVIDE (__etext = .)
+                [!provide]                        PROVIDE (_etext = .)
+                [!provide]                        PROVIDE (etext = .)
+
+.rodata         0x00000000c00032eb      0x4b9
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata.str1.1
+                0x00000000c00032eb       0x1e out/main.o
+ .rodata.str1.1
+                0x00000000c0003309        0xa out/init.o
+ .rodata.str1.1
+                0x00000000c0003313      0x261 out/interrupt.o
+ .rodata.str1.1
+                0x00000000c0003574       0x3f out/debug.o
+                                         0x41 (size before relaxing)
+ .rodata.str1.1
+                0x00000000c00035b3       0xa2 out/string.o
+ .rodata.str1.1
+                0x00000000c0003655       0x3c out/bitmap.o
+ .rodata.str1.1
+                0x00000000c0003691      0x113 out/memory.o
+                                        0x115 (size before relaxing)
+
+.rodata1
+ *(.rodata1)
+
+.eh_frame_hdr
+ *(.eh_frame_hdr)
+ *(.eh_frame_entry .eh_frame_entry.*)
+
+.eh_frame       0x00000000c00037a4      0x698
+ *(.eh_frame)
+ .eh_frame      0x00000000c00037a4       0x50 out/main.o
+ .eh_frame      0x00000000c00037f4       0x20 out/init.o
+                                         0x38 (size before relaxing)
+ .eh_frame      0x00000000c0003814      0x160 out/interrupt.o
+                                        0x178 (size before relaxing)
+ .eh_frame      0x00000000c0003974       0x1c out/debug.o
+                                         0x34 (size before relaxing)
+ .eh_frame      0x00000000c0003990      0x148 out/string.o
+                                        0x160 (size before relaxing)
+ .eh_frame      0x00000000c0003ad8       0x84 out/bitmap.o
+                                         0x9c (size before relaxing)
+ .eh_frame      0x00000000c0003b5c      0x120 out/memory.o
+                                        0x138 (size before relaxing)
+ .eh_frame      0x00000000c0003c7c       0x80 out/thread.o
+                                         0x98 (size before relaxing)
+ .eh_frame      0x00000000c0003cfc      0x140 out/list.o
+                                        0x158 (size before relaxing)
+ *(.eh_frame.*)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.gnu_extab
+ *(.gnu_extab*)
+
+.exception_ranges
+ *(.exception_ranges*)
+                0x00000000c0004000                . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
+
+.eh_frame
+ *(.eh_frame)
+ *(.eh_frame.*)
+
+.gnu_extab
+ *(.gnu_extab)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.exception_ranges
+ *(.exception_ranges*)
+
+.tdata          0x00000000c0004000        0x0
+                [!provide]                        PROVIDE (__tdata_start = .)
+ *(.tdata .tdata.* .gnu.linkonce.td.*)
+
+.tbss
+ *(.tbss .tbss.* .gnu.linkonce.tb.*)
+ *(.tcommon)
+
+.preinit_array  0x00000000c0004000        0x0
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+ *(.preinit_array)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+
+.init_array     0x00000000c0004000        0x0
+                [!provide]                        PROVIDE (__init_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
+ *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
+                [!provide]                        PROVIDE (__init_array_end = .)
+
+.fini_array     0x00000000c0004000        0x0
+                [!provide]                        PROVIDE (__fini_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
+ *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
+                [!provide]                        PROVIDE (__fini_array_end = .)
+
+.ctors
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+ *(SORT_BY_NAME(.ctors.*))
+ *(.ctors)
+
+.dtors
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ *(SORT_BY_NAME(.dtors.*))
+ *(.dtors)
+
+.jcr
+ *(.jcr)
+
+.data.rel.ro
+ *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
+ *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*)
+
+.dynamic
+ *(.dynamic)
+
+.got            0x00000000c0004000        0x0
+ *(.got)
+ .got           0x00000000c0004000        0x0 out/main.o
+ *(.igot)
+                0x00000000c0004000                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
+
+.got.plt        0x00000000c0004000        0x0
+ *(.got.plt)
+ .got.plt       0x00000000c0004000        0x0 out/main.o
+ *(.igot.plt)
+ .igot.plt      0x00000000c0004000        0x0 out/main.o
+
+.data           0x00000000c0004000       0xa0
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x00000000c0004000       0x96 out/kernel.o
+                0x00000000c0004012                intr_entry_table
+ *fill*         0x00000000c0004096        0x2 
+ .data          0x00000000c0004098        0x8 out/print.o
+
+.data1
+ *(.data1)
+                0x00000000c00040a0                _edata = .
+                [!provide]                        PROVIDE (edata = .)
+                0x00000000c00040a0                . = .
+                0x00000000c00040a0                __bss_start = .
+
+.bss            0x00000000c00040a0      0x23c
+ *(.dynbss)
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ .bss           0x00000000c00040a0      0x210 out/interrupt.o
+                0x00000000c00041a8                intr_name
+                0x00000000c000422c                idt_table
+ .bss           0x00000000c00042b0       0x2c out/memory.o
+                0x00000000c00042b0                kernel_pool
+                0x00000000c00042c0                user_pool
+                0x00000000c00042d0                kernel_vaddr
+ *(COMMON)
+                0x00000000c00042dc                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x00000000c00042dc                . = ALIGN (0x4)
+                0x00000000c00042dc                . = SEGMENT_START ("ldata-segment", .)
+                0x00000000c00042dc                . = ALIGN (0x4)
+                0x00000000c00042dc                _end = .
+                [!provide]                        PROVIDE (end = .)
+                0x00000000c00042dc                . = DATA_SEGMENT_END (.)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x0000000000000000       0x31
+ *(.comment)
+ .comment       0x0000000000000000       0x31 out/main.o
+                                         0x32 (size before relaxing)
+ .comment       0x0000000000000031       0x32 out/init.o
+ .comment       0x0000000000000031       0x32 out/interrupt.o
+ .comment       0x0000000000000031       0x32 out/debug.o
+ .comment       0x0000000000000031       0x32 out/string.o
+ .comment       0x0000000000000031       0x32 out/bitmap.o
+ .comment       0x0000000000000031       0x32 out/memory.o
+ .comment       0x0000000000000031       0x32 out/thread.o
+ .comment       0x0000000000000031       0x32 out/list.o
+
+.gnu.build.attributes
+ *(.gnu.build.attributes .gnu.build.attributes.*)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges
+ *(.debug_aranges)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info
+ *(.debug_info .gnu.linkonce.wi.*)
+
+.debug_abbrev
+ *(.debug_abbrev)
+
+.debug_line
+ *(.debug_line .debug_line.* .debug_line_end)
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str
+ *(.debug_str)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges
+ *(.debug_ranges)
+
+.debug_addr
+ *(.debug_addr)
+
+.debug_line_str
+ *(.debug_line_str)
+
+.debug_loclists
+ *(.debug_loclists)
+
+.debug_macro
+ *(.debug_macro)
+
+.debug_names
+ *(.debug_names)
+
+.debug_rnglists
+ *(.debug_rnglists)
+
+.debug_str_offsets
+ *(.debug_str_offsets)
+
+.debug_sup
+ *(.debug_sup)
+
+.gnu.attributes
+ *(.gnu.attributes)
+
+/DISCARD/
+ *(.note.GNU-stack)
+ *(.gnu_debuglink)
+ *(.gnu.lto_*)
+OUTPUT(out/kernel.bin elf32-i386)
