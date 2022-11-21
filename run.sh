@@ -22,9 +22,10 @@ nasm -f elf -o out/kernel.o kernel/kernel.s
 clang -I out/ -I lib/ -I kernel/ -c -fno-builtin -o out/main.o kernel/main.c  -target i386-pc-linux-elf
 clang -I out/ -I lib/ -I kernel/ -c -fno-builtin -o out/interrupt.o kernel/interrupt.c  -target i386-pc-linux-elf
 clang -I out/ -I lib/ -I kernel/ -c -fno-builtin -o out/init.o kernel/init.c  -target i386-pc-linux-elf
+clang -I out/ -I lib/ -I kernel/ -c -fno-builtin -o out/debug.o kernel/debug.c  -target i386-pc-linux-elf
 
 
-x86_64-elf-ld -Ttext 0xc0001500 -e main -o out/kernel.bin  out/main.o out/init.o out/interrupt.o out/print.o out/kernel.o -m elf_i386
+x86_64-elf-ld -Ttext 0xc0001500 -e main -o out/kernel.bin  out/main.o out/init.o out/interrupt.o out/print.o out/kernel.o out/debug.o -m elf_i386
 
 # 创建hd60M.img镜像文件
 bximage -q -func=create -hd=60M -imgmode=flat hd60M.img
@@ -35,4 +36,4 @@ dd if=out/loader.bin of=hd60M.img bs=512 count=4 seek=2 conv=notrunc
 
 dd if=out/kernel.bin of=hd60M.img bs=512 count=200 seek=9 conv=notrunc
 
-bochs -f bochsrc.disk
+# bochs -f bochsrc.disk

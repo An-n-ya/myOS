@@ -2,6 +2,9 @@
 #define __KERNEL_GLOBAL_H
 #include "../lib/stdint.h"
 
+
+#define NULL ((void *)0)
+
 #define RPL0 0
 #define RPL1 1
 #define RPL2 2
@@ -25,4 +28,9 @@
 #define IDT_DESC_ATTR_DPL0 ((IDT_DESC_P << 7) + (IDT_DESC_DPL0 << 5) + IDT_DESC_32_TYPE)
 #define IDT_DESC_ATTR_DPL3 ((IDT_DESC_P << 7) + (IDT_DESC_DPL3 << 5) + IDT_DESC_32_TYPE)
 
+typedef enum
+{
+    true = 1,
+    false = 0
+} bool;
 #endif
