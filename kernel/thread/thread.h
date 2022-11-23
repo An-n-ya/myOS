@@ -83,11 +83,11 @@ struct task_struct {
     uint32_t stack_magic;
 };
 
-struct task_struct* running_thread();
+struct task_struct* running_thread(void);
 void thread_create(struct task_struct* pthread, thread_func function, void* func_args);
 void init_thread(struct task_struct* pthread, char* name, int prio);
 struct task_struct* thread_start(char* name, int prio, thread_func function, void* func_args);
-void schedule();
-void thread_init();
+void schedule(void);
+void thread_init(void);
 
 # endif

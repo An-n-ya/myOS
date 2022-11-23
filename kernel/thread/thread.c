@@ -99,6 +99,47 @@ struct task_struct* thread_start(char* name, int prio, thread_func function, voi
 }
 
 /**
+ * 将当前线程阻塞，状态设置为stat
+ */
+void thread_block(enum task_status stat) {
+     // stat应该为BLOCKED WAITING HANGING这样的阻塞状态
+    ASSERT(stat == TASK_BLOCKED || stat == TASK_WAITTING || stat == TASK_HANGING);
+    // 关中断，保证原子操作
+    enum intr_status old_status = intr_disable();
+    // 获得当前线程
+    struct task_struct* cur_thread = running_thread();
+    // 设置当前线程状态为阻塞
+    cur_thread->status = stat;
+    // 换下当前线程
+    schedule();
+    // 还原中断
+    intr_set_status(old_status);
+}
+
+/**
+ * 将pthread接触阻塞
+ */
+void thread_unlock(struct task_struct* pthread) {
+    // 关中断，保证操作的原子性
+    enum intr_status old_status = intr_disable();
+    // 参数线程的状态应该是阻塞的
+    ASSERT(pthread->status == TASK_BLOCKED || pthread->status == TASK_WAITTING || pthread->status == TASK_HANGING);
+    if (pthread->status != TASK_READY)  {
+        ASSERT(!list_find(&thread_ready_list, &pthread->general_tag));
+        if (list_find(&thread_ready_list, &pthread->general_tag)) {
+            PANIC("thread_unblock: blocked thread is in ready_list\n");
+        }
+        // 将参数线程加入ready_list
+        list_push(&thread_ready_list, &pthread->general_tag);
+        // 设置线程状态为 READY
+        pthread->status = TASK_READY;
+    }
+    // 恢复中断
+    intr_set_status(old_status);
+}
+
+
+/**
  * 线程调度.
  */
 void schedule() {

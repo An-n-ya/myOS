@@ -37,7 +37,9 @@ void k_thread_a(void *arg)
     char *para = arg;
     while (1)
     {
+        intr_disable();
         put_str(para);
+        intr_enable();
     }
 }
 
@@ -46,6 +48,8 @@ void k_thread_b(void *arg)
     char *para = arg;
     while (1)
     {
+        intr_disable();
         put_str(para);
+        intr_enable();
     }
 }
