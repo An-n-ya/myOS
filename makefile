@@ -9,7 +9,7 @@ ASFLAGS = -f elf
 ASIB = -I include/
 CFLAGS = -Wall -fno-stack-protector $(LIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -target i386-pc-linux-elf
 LDFLAGS = -m elf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)/kernel.map
-OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/print.o $(BUILD_DIR)/debug.o $(BUILD_DIR)/string.o $(BUILD_DIR)/bitmap.o $(BUILD_DIR)/memory.o $(BUILD_DIR)/thread.o $(BUILD_DIR)/list.o $(BUILD_DIR)/timer.o $(BUILD_DIR)/switch.o
+OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/print.o $(BUILD_DIR)/debug.o $(BUILD_DIR)/string.o $(BUILD_DIR)/bitmap.o $(BUILD_DIR)/memory.o $(BUILD_DIR)/thread.o $(BUILD_DIR)/list.o $(BUILD_DIR)/timer.o $(BUILD_DIR)/switch.o $(BUILD_DIR)/sync.o $(BUILD_DIR)/console.o
 
 # C代码编译
 $(BUILD_DIR)/main.o: kernel/main.c lib/kernel/print.h lib/stdint.h kernel/init.h
@@ -42,6 +42,12 @@ $(BUILD_DIR)/list.o: lib/kernel/list.c lib/kernel/list.h kernel/interrupt.h
 $(BUILD_DIR)/timer.o: device/timer.c device/timer.h kernel/debug.h kernel/thread/thread.h
 	$(CC) $(CFLAGS) $< -o $@
 
+$(BUILD_DIR)/console.o: device/console.c device/console.h kernel/thread/sync.o
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/sync.o: kernel/thread/sync.c kernel/thread/sync.h kernel/thread/thread.h kernel/debug.h
+	$(CC) $(CFLAGS) $< -o $@
+
 # 编译loader和mbr
 $(BUILD_DIR)/mbr.bin: boot/mbr.s
 	$(AS) $(ASIB) $< -o $@
@@ -53,7 +59,7 @@ $(BUILD_DIR)/loader.bin: boot/loader.s
 $(BUILD_DIR)/kernel.o: kernel/kernel.s
 	$(AS) $(ASFLAGS) $< -o $@
 
-$(BUILD_DIR)/print.o: lib/kernel/print.s
+$(BUILD_DIR)/print.o: lib/kernel/print.asm
 	$(AS) $(ASFLAGS) $< -o $@
 
 $(BUILD_DIR)/switch.o: kernel/thread/switch.asm
