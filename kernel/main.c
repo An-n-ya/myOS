@@ -3,6 +3,8 @@
 #include "./thread/thread.h"
 #include "interrupt.h"
 #include "../device/console.h"
+#include "../device/ioqueue.h"
+#include "../device/keyboard.h"
 
 void k_thread_a(void *);
 void k_thread_b(void *);
@@ -22,8 +24,8 @@ int main(void)
     // ASSERT(1 == 2);
 
     // 优先级设置为31
-//    thread_start("k_thread_a", 31, k_thread_a, "argA ");
-//    thread_start("k_thread_b", 8, k_thread_b, "argB ");
+    thread_start("k_thread_a", 31, k_thread_a, "argA ");
+    thread_start("k_thread_b", 8, k_thread_b, "argB ");
 
 
     intr_enable();
@@ -38,7 +40,16 @@ void k_thread_a(void *arg)
     char *para = arg;
     while (1)
     {
-        console_put_str(para);
+        enum intr_status old_status = intr_disable();
+        if(!ioq_empty(&kbd_buf)) {
+            // 打印传进来的参数
+            console_put_str(arg);
+            // 消费缓冲区
+            char byte = ioq_getchar(&kbd_buf);
+            // 打印缓冲区得到的字符
+            console_put_char(byte);
+        }
+        intr_set_status(old_status);
     }
 }
 
@@ -47,6 +58,15 @@ void k_thread_b(void *arg)
     char *para = arg;
     while (1)
     {
-        console_put_str(para);
+        enum intr_status old_status = intr_disable();
+        if(!ioq_empty(&kbd_buf)) {
+            // 打印传进来的参数
+            console_put_str(arg);
+            // 消费缓冲区
+            char byte = ioq_getchar(&kbd_buf);
+            // 打印缓冲区得到的字符
+            console_put_char(byte);
+        }
+        intr_set_status(old_status);
     }
 }

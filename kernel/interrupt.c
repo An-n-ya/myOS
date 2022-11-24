@@ -51,8 +51,8 @@ static void pic_init(void)
     outb(PIC_M_DATA, 0xfe);
     outb(PIC_S_DATA, 0xff);
 
-    // 只打开键盘中断，其他全部关闭
-    outb(PIC_M_DATA, 0xfd);
+    // 只打开键盘中断和时钟中断，其他全部关闭
+    outb(PIC_M_DATA, 0xfc);
     outb(PIC_S_DATA, 0xff);
 
     put_str("   pic_init done\n");
