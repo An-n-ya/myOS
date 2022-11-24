@@ -3,6 +3,7 @@
 #include "../kernel/interrupt.h"
 #include "../kernel/io.h"
 #include "../kernel/global.h"
+#include "ioqueue.h"
 
 #define KBD_BUF_PORT 0x60       // 键盘buffer寄存器端口号
 
@@ -36,6 +37,8 @@
 // 以下变量用于记录响应按键是否被按下
 // ext_scancode 表示extend码，用来记录makecode是否以0xe0开头
 static bool ctrl_status, shift_status, alt_status, caps_lock_status, ext_scancode;
+
+struct ioqueue kbd_buf;
 
 // 二维数组： 扫描码   shift+扫描码
 static char keymap[][2] = {
@@ -173,7 +176,12 @@ static void intr_keyboard_handler(void) {
 
         // 如果可见，就打印出来
         if (cur_char) {
-            put_char(cur_char);
+            // 加入缓冲区
+            if (!ioq_full(&kbd_buf)) {
+                // 打印出来
+                put_char(cur_char);
+                ioq_putchar(&kbd_buf, cur_char);
+            }
             return;
         }
 
@@ -194,6 +202,7 @@ static void intr_keyboard_handler(void) {
 
 void keyboard_init() {
     put_str("keyboard init start\n");
+    ioqueue_init(&kbd_buf);                                     // 初始化环形缓冲区
     register_handler(0x21, intr_keyboard_handler); // 注册0x21号中断（键盘中断）
     put_str("keyboard init done\n");
 }
