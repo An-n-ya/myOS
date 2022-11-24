@@ -4,7 +4,7 @@
 #include "io.h"
 #include "kernel/print.h"
 
-#define IDT_DESC_CNT 0x21 // 目前支持的中断数
+#define IDT_DESC_CNT 0x30 // 目前支持的中断数
 #define PIC_M_CTRL 0x20
 #define PIC_M_DATA 0x21
 #define PIC_S_CTRL 0xa0
@@ -31,7 +31,7 @@ static struct gate_desc idt[IDT_DESC_CNT]; // 中断门描述符数组
 char *intr_name[IDT_DESC_CNT];        // 用于保存异常的名字
 intr_handler idt_table[IDT_DESC_CNT]; // 定义中断函数的数组
 
-extern intr_handler intr_entry_table[IDT_DESC_CNT]; // kernel.s 中定义的intr_entry_table
+extern intr_handler intr_entry_table[IDT_DESC_CNT]; // kernel.asm 中定义的intr_entry_table
 
 // 配置8259A
 static void pic_init(void)
@@ -49,6 +49,10 @@ static void pic_init(void)
 
     // 打开主片上的IR0
     outb(PIC_M_DATA, 0xfe);
+    outb(PIC_S_DATA, 0xff);
+
+    // 只打开键盘中断，其他全部关闭
+    outb(PIC_M_DATA, 0xfd);
     outb(PIC_S_DATA, 0xff);
 
     put_str("   pic_init done\n");
