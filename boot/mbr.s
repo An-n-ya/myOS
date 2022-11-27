@@ -39,7 +39,7 @@ SECTION MBR vstart=0x7c00
 	mov cx,  4						; 待读入的扇区数
 	call rd_disk_m_16				; 往下读取程序的起始部分(即cx规定的1个扇区）
 
-	jmp LOADER_BASE_ADDR			; MBR完成使命， 将地址移动到LOADER_BASE_ADDR
+	jmp LOADER_BASE_ADDR + 0x300		; MBR完成使命， 将地址移动到LOADER_BASE_ADDR
 
 ; -----------------------------------------------------------------------------------------
 ; 功能：读取硬盘n个扇区

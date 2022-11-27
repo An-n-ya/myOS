@@ -1,4 +1,4 @@
-#include "init.h"
+﻿#include "init.h"
 #include "kernel/print.h"
 #include "interrupt.h"
 #include "memory.h"
@@ -6,6 +6,8 @@
 #include "timer.h"
 #include "console.h"
 #include "keyboard.h"
+#include "../userprog/tss.h"
+
 
 void init_all()
 {
@@ -16,4 +18,5 @@ void init_all()
     thread_init();
     console_init();
     keyboard_init();
+    tss_init();
 }
