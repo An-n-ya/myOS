@@ -2,6 +2,7 @@
   <dictionary name="zhanghuanyu">
     <words>
       <w>addr</w>
+      <w>vaddr</w>
     </words>
   </dictionary>
 </component>
