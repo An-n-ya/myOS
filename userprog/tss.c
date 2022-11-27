@@ -75,7 +75,6 @@ void tss_init() {
 
     // tss安装到gdt的第四个位置
     *((struct gdt_desc*) 0xc0000920) = make_gdt_desc((uint32_t*) &tss, tss_size - 1, TSS_ATTR_LOW, TSS_ATTR_HIGH);
-    put_str("Assign done\n");
 
     // dpl为3的代码段
     *((struct gdt_desc*) 0xc0000928) = make_gdt_desc((uint32_t*) 0, 0xfffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);

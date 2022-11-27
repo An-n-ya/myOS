@@ -2,12 +2,12 @@ BUILD_DIR = out
 IMG_NAME = hd60M.img
 ENTRY_POINT = 0xc0001500
 AS = nasm
-CC = clang
+CC = x86_64-elf-gcc
 LD = x86_64-elf-ld
 LIB = -I lib/ -I kernel/ -I device/
 ASFLAGS = -f elf
 ASIB = -I include/
-CFLAGS = -Wall -fno-stack-protector $(LIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -target i386-pc-linux-elf
+CFLAGS = -Wall -fno-stack-protector $(LIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -t i386-pc-linux-elf
 LDFLAGS = -m elf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)/kernel.map
 OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/print.o $(BUILD_DIR)/debug.o $(BUILD_DIR)/string.o $(BUILD_DIR)/bitmap.o $(BUILD_DIR)/memory.o $(BUILD_DIR)/thread.o $(BUILD_DIR)/list.o $(BUILD_DIR)/timer.o $(BUILD_DIR)/switch.o $(BUILD_DIR)/sync.o $(BUILD_DIR)/console.o $(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o $(BUILD_DIR)/tss.o
 
