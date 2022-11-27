@@ -6,6 +6,7 @@
 # include "interrupt.h"
 # include "debug.h"
 # include "kernel/print.h"
+#include "../../userprog/process.h"
 
 # define PAGE_SIZE 4096
 
@@ -161,6 +162,9 @@ void schedule() {
     thread_tag = list_pop(&thread_ready_list);
     struct task_struct* next = elem2entry(struct task_struct, general_tag, thread_tag);
     next->status = TASK_RUNNING;
+
+    // 激活任务页表
+    process_active(next);
 
     switch_to(cur_thread, next);
 }
