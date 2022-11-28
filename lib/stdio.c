@@ -5,7 +5,7 @@
 #include "global.h"
 
 #define va_start(ap, v) ap = (va_list)&v            // 把 ap 指向的第一个固定参数v
-#define va_arg(ap, t) *((t*)(ap += 4))              // ap 指向下一个参数，并返回其值
+#define va_arg(ap, t) *((t*)(ap += 4))              // ap 指向下一个参数，并转换类型返回其值
 #define va_end(ap)  ap = NULL                       // 清除ap
 
 /**
@@ -34,6 +34,7 @@ uint32_t vspringf(char* str, const char* format, va_list ap) {
     const char* index_ptr = format;
     char index_char = *index_ptr;
     int32_t arg_int;
+    char* arg_str;
     while (index_char) {
         if (index_char != '%') {
             // 如果开头不是 %，遍历下一个字符
@@ -45,18 +46,39 @@ uint32_t vspringf(char* str, const char* format, va_list ap) {
         // 分情况处理格式类型
         index_char = *(++index_ptr);
         switch (index_char) {
+            case 's':
+                arg_str = va_arg(ap, char*);    // 把下一个参数转成char*型
+                strcpy(buf_ptr, arg_str);
+                buf_ptr += strlen(arg_str);
+                break;
+            case 'c':
+                *(buf_ptr++) = va_arg(ap, char);
+                break;
+            case 'd':
+                // 处理十进制整数
+                arg_int = va_arg(ap, int);
+                if (arg_int < 0) {
+                    arg_int = 0 - arg_int;  // 把arg_int变成正数
+                    *buf_ptr++ = '-';       // 加上负号
+                }
+                // 转成十进制数，加到字符串后边
+                itoa(arg_int, &buf_ptr, 10);
+                break;
             case 'x':
                 // 处理十六进制数字
                 arg_int = va_arg(ap, int);      // char转成int型
                 itoa(arg_int, &buf_ptr, 16);
-                index_char = *(++index_ptr);    // 跳过格式类型
                 break;
         }
+        index_char = *(++index_ptr);    // 跳过格式类型
     }
 
     return strlen(str);
 }
 
+/**
+ * 按格式打印字符串
+ */
 uint32_t printf(const char* format, ...) {
     va_list args;
     va_start(args, format);     // 使 args 指向 format
@@ -64,5 +86,16 @@ uint32_t printf(const char* format, ...) {
     vspringf(buf, format, args);
     va_end(args);
     return write(buf);
+}
 
+/**
+ * 将格式化字符串输出到buf
+ */
+uint32_t sprintf(char* buf, const char* format, ...) {
+    va_list args;
+    uint32_t retval;
+    va_start(args, format);
+    retval = vspringf(buf, format, args);
+    va_end(args);
+    return retval;
 }
