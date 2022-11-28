@@ -97,3 +97,32 @@ VECTOR 0x2c, ZERO           ; ps/2鼠标
 VECTOR 0x2d, ZERO           ; fpu浮点单元异常
 VECTOR 0x2e, ZERO           ; 硬盘
 VECTOR 0x2f, ZERO           ; 保留
+
+;;;;;;;;;;;;;;;;;;;;;    0x80 号中断   ;;;;;;;;;;;;;;;;;;;;;;;;
+[bits 32]
+extern      syscall_table
+section     .text
+global      syscall_handler
+syscall_handler:
+    push    0       ; 压入0，使栈中格式统一
+    push    ds
+    push    es
+    push    fs
+    push    gs
+    pushad
+    push    0x80    ; 此处压入0x80也是为了格式统一
+
+    ; 为系统调用传入参数
+    push    edx
+    push    ecx
+    push    ebx
+
+    ; 调用子功能处理函数
+    call    [syscall_table + eax * 4]
+    add     esp,    12  ; 跨过上面三个参数
+
+    ; 将call调用后的返回值存入内核栈，这个位置对应的就是内核栈eax的位置
+    mov     [esp + 8 * 4],  eax
+    jmp     intr_exit
+
+
