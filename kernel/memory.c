@@ -6,6 +6,7 @@
 #include "print.h"
 #include "string.h"
 #include "sync.h"
+#include "interrupt.h"
 
 /***************  位图地址 ********************
  * 因为0xc009f000是内核主线程栈顶，0xc009e000是内核主线程的pcb.
@@ -316,11 +317,126 @@ void block_desc_init(struct mem_block_desc* desc_array) {
     }
 }
 
+/**
+ * 返回arena中第idx个内存块的地址
+ */
+static struct mem_block* arena2block(struct arena *a, uint32_t idx) {
+    // a的地址 + arena元信息大小 + idx * 内存块大小
+    return (struct mem_block*)((uint32_t)a + sizeof(struct arena) + idx * a->desc->block_size);
+}
+
+/**
+ * 返回内存块b所在的arena地址
+ */
+static struct arena* block2arena(struct mem_block* b) {
+    // 因为一个arena是4KB, 所以抹去b的低12位就是arena的地址了
+    return (struct arena*)((uint32_t)b & 0xfffff000);
+}
+
+/**
+ * 在堆中申请size字节内存
+ */
+void* sys_malloc(uint32_t size) {
+    enum pool_flags PF;
+    struct pool* mem_pool;
+    uint32_t pool_size;
+    struct mem_block_desc* descs;
+    struct task_struct* cur_thread = running_thread();
+
+    if (cur_thread->pgdir == NULL) {
+        // 如果是内核线程
+        PF = PF_KERNEL;
+        pool_size = kernel_pool.pool_size;
+        mem_pool = &kernel_pool;
+        descs = k_block_descs;
+    } else {
+        PF = PF_USER;
+        pool_size = user_pool.pool_size;
+        mem_pool = &user_pool;
+        descs = cur_thread->u_block_desc;       // 取出线程里的内存块描述符
+    }
+
+    if (!(size > 0 && size < pool_size)) {
+        // 如果申请的内存超过了内存池范围，直接返回NULL
+        return NULL;
+    }
+    struct arena* a;
+    struct mem_block* b;
+    // 下面开始创建arena
+    lock_acquire(&mem_pool->lock);
+
+    if (size > 1024) {
+        // 如果size大于1024, 就分配页堆
+        uint32_t page_cnt = DIV_ROUND_UP(size + sizeof(struct arena), PG_SIZE);    // 计算需要多少个页
+        a = malloc_page(PF, page_cnt);                                  // 分配页
+
+        if (a != NULL) {
+            // 如果分配成功
+            memset(a, 0, page_cnt * PG_SIZE);                     // 将分配的内存清零
+            a->desc = NULL;
+            a->cnt = page_cnt;
+            a->large = true;
+            // 释放锁， 返回
+            lock_release(&mem_pool->lock);
+            return (void*)(a+1);
+        } else {
+            // 分配不成功就返回NULL
+            lock_release(&mem_pool->lock);
+            return NULL;
+        }
+    } else {
+        // 如果分配的内存小于1024
+        uint8_t desc_idx;
+        // 从内存块描述符中找到合适的内存块规格
+        for (desc_idx = 0; desc_idx < DESC_CNT; ++desc_idx) {
+            if (size <= descs[desc_idx].block_size) {
+                break;
+            }
+        }
+        if (list_empty(&descs[desc_idx].free_list)) {
+            // 如果相应规格的内存块已经用尽，则创建新的arena
+            a = malloc_page(PF, 1);     // 分配一个新的页作为arena
+            if (a == NULL) {
+                // 如果内存池满了 返回NULL
+                lock_release(&mem_pool->lock);
+                return NULL;
+            }
+            memset(a, 0, PG_SIZE);  // 将arena清零(这不不可少，因为回收内存的时候不会清零)
+
+            a->desc = &descs[desc_idx];
+            a->large = false;
+            a->cnt = descs[desc_idx].blocks_per_arena;
+            uint32_t block_idx;
+            // 关中断
+            enum intr_status old_status = intr_disable();
+            // 将arena拆成内存块，并添加到内存描述符的free_list中
+            for (int block_idx = 0; block_idx < descs[desc_idx].blocks_per_arena; ++block_idx) {
+                b = arena2block(a, block_idx);
+                ASSERT(!elem_find(&a->desc->free_list, &b->free_elem));  // 确保之前没有分配过
+                list_append(&a->desc->free_list, &b->free_elem);
+            }
+            // 恢复中断
+            intr_set_status(old_status);
+        }
+        // 从描述符的空闲列表中取出一个内存块，把内存块中的free_elem取出来
+        b = elem2entry(struct mem_block, free_elem, list_pop(&(descs[desc_idx].free_list)));
+        memset(b, 0, descs[desc_idx].block_size);    // 初始化内存块
+        a = block2arena(b);                                         // 取得内存块所在的arena
+        a->cnt--;                                                   // arena中空闲的内存块数量减一
+        lock_release(&mem_pool->lock);
+        return (void*)b;
+    };
+
+
+}
+
 /* 内存管理部分初始化入口 */
 void mem_init() {
     put_str("mem_init start\n");
     uint32_t mem_bytes_total = (*(uint32_t*)(0xb00));
     mem_pool_init(mem_bytes_total);	  // 初始化内存池
-    block_desc_init(k_block_descs); // 初始化内存块描述符
+    block_desc_init(k_block_descs); // 初始化内核的内存块描述符, 用户空间的内存块描述符初始化是在process_execute里完成的
     put_str("mem_init done\n");
 }
+
+
