@@ -28,8 +28,18 @@ struct pool {
    struct lock lock;		 // 申请内存时互斥
 };
 
+struct arena {
+    struct mem_block_desc* desc;        // 与此arena关联的mem_block_desc
+    // large为真时，cnt表示页框数，large为否时，cnt表示空闲mem_block数量
+    uint32_t cnt;
+    bool large;
+};
+
+struct mem_block_desc k_block_descs[DESC_CNT];  // 内存块描述符的数组
+
 struct pool kernel_pool, user_pool;      // 生成内核内存池和用户内存池
 struct virtual_addr kernel_vaddr;	 // 此结构是用来给内核分配虚拟地址
+
 
 /* 在pf表示的虚拟内存池中申请pg_cnt个虚拟页,
  * 成功则返回虚拟页的起始地址, 失败则返回NULL */
@@ -290,10 +300,27 @@ static void mem_pool_init(uint32_t all_mem) {
    put_str("   mem_pool_init done\n");
 }
 
+/**
+ * 为malloc做准备
+ */
+void block_desc_init(struct mem_block_desc* desc_array) {
+    uint16_t desc_idx, block_size = 16;
+
+    // 初始化每个内存块描述符
+    for (desc_idx = 0; desc_idx < DESC_CNT; desc_idx++) {
+        desc_array[desc_idx].block_size = block_size;
+        // 计算arena可以存放多少内存块： 一页减去元信息后除以block大小
+        desc_array[desc_idx].blocks_per_arena = (PG_SIZE - sizeof(struct arena)) / block_size;
+        list_init(&desc_array[desc_idx].free_list);
+        block_size *= 2;    // 更新block_size 用来初始化下一个内存块描述符
+    }
+}
+
 /* 内存管理部分初始化入口 */
 void mem_init() {
-   put_str("mem_init start\n");
-   uint32_t mem_bytes_total = (*(uint32_t*)(0xb00));
-   mem_pool_init(mem_bytes_total);	  // 初始化内存池
-   put_str("mem_init done\n");
+    put_str("mem_init start\n");
+    uint32_t mem_bytes_total = (*(uint32_t*)(0xb00));
+    mem_pool_init(mem_bytes_total);	  // 初始化内存池
+    block_desc_init(k_block_descs); // 初始化内存块描述符
+    put_str("mem_init done\n");
 }
