@@ -4,9 +4,7 @@
 #include "syscall.h"
 #include "global.h"
 
-#define va_start(ap, v) ap = (va_list)&v            // 把 ap 指向的第一个固定参数v
-#define va_arg(ap, t) *((t*)(ap += 4))              // ap 指向下一个参数，并转换类型返回其值
-#define va_end(ap)  ap = NULL                       // 清除ap
+
 
 /**
  * 将整型按进制转换成字符，也就是把整数转化成对应的ascii码字符
