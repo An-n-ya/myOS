@@ -29,7 +29,7 @@ struct disk {
     struct ide_channel* my_channel;     // 次硬盘归属于哪个 ide 通道
     uint8_t dev_no;                     // 0-主，1-从
     struct partition prim_parts[4];     // 主分区顶多是4个
-    struct partition login_parts[8];    // 逻辑分区理论上支持无限个，这里限制为最多8个
+    struct partition logic_parts[8];    // 逻辑分区理论上支持无限个，这里限制为最多8个
 };
 
 /**

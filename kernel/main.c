@@ -20,10 +20,10 @@ int main(void) {
     init_all();
 
     intr_enable();
-    process_execute(u_prog_a, "u_prog_a");
-    process_execute(u_prog_b, "u_prog_b");
-    thread_start("k_thread_a", 31, k_thread_a, "arg A");
-    thread_start("k_thread_b", 31, k_thread_b, "arg B");
+//    process_execute(u_prog_a, "u_prog_a");
+//    process_execute(u_prog_b, "u_prog_b");
+//    thread_start("k_thread_a", 31, k_thread_a, "arg A");
+//    thread_start("k_thread_b", 31, k_thread_b, "arg B");
 
     while(1);
     return 0;
