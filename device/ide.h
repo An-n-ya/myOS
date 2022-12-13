@@ -3,8 +3,9 @@
 
 #include "stdint.h"
 #include "sync.h"
-
-
+#include "../fs/super_block.h"
+#include "list.h"
+#include "bitmap.h"
 
 /**
  * 分区结构
@@ -12,10 +13,10 @@
 struct partition {
     uint32_t start_lba;                 // 起始扇区
     uint32_t sec_cnt;                   // 扇区数
-    struct disk* my_disk;               //分区所属硬盘
+        struct disk* my_disk;               //分区所属硬盘
     struct list_elem part_tag;          // 用于队列中的标记
     char name[8];                       // 分区名称
-//    struct super_block* sb;             // 分区超级块
+    struct super_block* sb;             // 分区超级块
     struct bitmap block_bitmap;         // 块位图
     struct bitmap inode_bitmap;         // inode位图
     struct list open_inodes;            // 分区已经打开的i节点队列
@@ -49,6 +50,11 @@ void ide_init();
 void intr_hd_handler(uint8_t irq_no);
 void ide_write(struct disk* hd, uint32_t lba, void* buf, uint32_t sec_cnt);
 void ide_read(struct disk* hd, uint32_t lba, void* buf, uint32_t sec_cnt);
+
+extern uint8_t channel_cnt;
+// 类型是先定义再使用，这一句应该放到结构体ide_channel定义的下面
+extern struct ide_channel channels[];
+extern struct list partition_list;
 
 #endif //OS_LEARN_IDE_H
 

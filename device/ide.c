@@ -16,7 +16,7 @@
 #define reg_lba_l(channel)          (channel->port_base+3)
 #define reg_lba_m(channel)          (channel->port_base+4)
 #define reg_lba_h(channel)          (channel->port_base+5)
-#define reg_dev(channel)            (channel->port_base+6)
+#define reg_dev(channel)            (channel->port_base+6) // device寄存器
 #define reg_status(channel)         (channel->port_base+7)
 #define reg_cmd(channel)            (reg_status(channel))
 #define reg_alt_status(channel)     (channel->port_base+0x206)
@@ -54,7 +54,7 @@ struct list partition_list;                 // 分区队列
 
 // 分区表项目
 struct partition_table_entry {
-    uint8_t bootable;       // 是否可引导
+    __attribute__((unused)) uint8_t bootable;       // 是否可引导
     uint8_t start_head;     // 起始磁头号
     uint8_t start_sec;      // 起始扇区号
     uint8_t start_chs;      // 起始柱面号
@@ -68,7 +68,7 @@ struct partition_table_entry {
 } __attribute__ ((packed)); // 禁用gcc的自动对齐，让此结构无空隙
 
 struct boot_sector {
-    uint8_t  other[446];    // 本分区起始扇区的lba地址
+    uint8_t  other[446];    // 分区工具产生的空间，不用去管
     struct partition_table_entry partition_table[4];// 分区表中有4项，共64字节
     uint16_t signature;     // 启动扇区的结束标志0x55 0xaa
 };__attribute__((packed))
@@ -129,6 +129,7 @@ static void read_from_sector(struct disk* hd, void* buf, uint8_t sec_cnt){
     } else {
         size_in_byte = sec_cnt * 512;
     }
+    // 从data端口读数据
     insw(reg_data(hd->my_channel), buf, size_in_byte / 2);
 }
 
@@ -217,7 +218,7 @@ static void partition_scan(struct disk* hd, uint32_t ext_lba) {
 
     // 遍历分区表4个分区项
     while (part_idx++ < 4) {
-        if (p->fs_type == 0x5) {
+        if (p->fs_type == 0x5) { // 分区类型是0x05
             // 如果是扩展分区
             if (ext_lba_base != 0) {
 
@@ -236,6 +237,7 @@ static void partition_scan(struct disk* hd, uint32_t ext_lba) {
                 hd->prim_parts[p_no].sec_cnt = p->sec_cnt;
                 hd->prim_parts[p_no].my_disk = hd;
                 list_append(&partition_list, &hd->prim_parts[p_no].part_tag);
+                // 生成主分区的名字
                 sprintf(hd->prim_parts[p_no].name, "%s%d", hd->name, p_no+1);
                 p_no++;
                 ASSERT(p_no < 4);
@@ -244,6 +246,7 @@ static void partition_scan(struct disk* hd, uint32_t ext_lba) {
                 hd->logic_parts[l_no].sec_cnt = p->sec_cnt;
                 hd->logic_parts[l_no].my_disk = hd;
                 list_append(&partition_list, &hd->logic_parts[l_no].part_tag);
+                // 生成逻辑分区的名字
                 sprintf(hd->logic_parts[l_no].name, "%s%d", hd->name, l_no + 5); //逻辑分区从5开始
                 l_no++;
                 if (l_no >= 8) {
@@ -256,7 +259,7 @@ static void partition_scan(struct disk* hd, uint32_t ext_lba) {
     sys_free(bs);
 }
 
-static bool partition_info(struct list_elem* pelem, int UNUSED) {
+static bool partition_info(struct list_elem* pelem, int arg UNUSED) {
     struct partition* part = elem2entry(struct partition, part_tag, pelem);
     printk("    %s start_lba:0x%x, sec_cnt: 0x%x\n",part->name, part->start_lba, part->sec_cnt);
     return false;
@@ -379,6 +382,8 @@ void ide_init() {
     ASSERT(hd_cnt > 0);
     channel_cnt = DIV_ROUND_UP(hd_cnt, 2);      // 一个ide通道上有两个硬盘，硬盘数除以2就是通道数
 
+    list_init(&partition_list); //初始化链表
+
     struct ide_channel* channel;
     uint8_t channel_no = 0;
     uint8_t dev_no = 0;
@@ -415,6 +420,7 @@ void ide_init() {
                 // 不处理hd60M，这里处理了hd80M
                 partition_scan(hd, 0);
             }
+            // 重置主分区和逻辑分区的下标
             p_no = 0, l_no = 0;
             dev_no++;
         }
