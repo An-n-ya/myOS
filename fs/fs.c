@@ -7,6 +7,8 @@
 #include "string.h"
 #include "debug.h"
 
+struct partition* cur_part; // 当前分区
+
 /**
  * 格式化分区
  *  文件系统的布局如下：
@@ -152,6 +154,63 @@ static void partition_format(struct partition* part) {
     // 释放缓冲区
     sys_free(buf);
 }
+
+
+static bool mount_partition(struct list_elem* part_elem, int arg) {
+    char* part_name = (char*) arg;  // 转成字符
+    struct partition* part = elem2entry(struct partition, part_tag, part_elem); // 获取partition结构
+    if(!strcmp(part->name, part_name)) {
+        cur_part = part;
+        struct disk* hd = cur_part->my_disk;
+
+        // 读入超级块的缓存
+        struct super_block* sb_buf = (struct super_block*) sys_malloc(SECTOR_SIZE);
+
+        // 给cur_part的超级块分配内存
+        cur_part->sb = (struct super_block*) sys_malloc(sizeof (struct super_block));
+        if (cur_part->sb == NULL) {
+            PANIC("cur_part->sb malloc failed!");
+        }
+
+        memset(sb_buf, 0, SECTOR_SIZE);
+        // 读入超级块
+        ide_read(hd, cur_part->start_lba + 1, sb_buf, 1);
+        // 把sb_buf中的超级块数据复制到cur_part中
+        memcpy(cur_part->sb, sb_buf, sizeof (struct super_block));
+
+        /***************  将硬盘上的块位图读入到内存   ****************/
+        cur_part->block_bitmap.bits = (uint8_t*) sys_malloc(sb_buf->block_bitmap_sects*SECTOR_SIZE);
+        if (cur_part->block_bitmap.bits == NULL) {
+            PANIC("block_bitmap.bits malloc failed!");
+        }
+        // 设置位图大小
+        cur_part->block_bitmap.btmp_bytes_len = sb_buf->block_bitmap_sects * SECTOR_SIZE;
+
+        // 从硬盘上读入块位图到分区的block_bitmap.bits
+        ide_read(hd, sb_buf->block_bitmap_lba, cur_part->block_bitmap.bits, sb_buf->block_bitmap_sects);
+
+        /***************  将硬盘上的inode位图读入到内存   ****************/
+        cur_part->inode_bitmap.bits = (uint8_t*) sys_malloc(sb_buf->inode_bitmap_sects * SECTOR_SIZE);
+        if (cur_part->inode_bitmap.bits == NULL) {
+            PANIC("inode_bitmap.bits malloc failed!");
+        }
+        cur_part->inode_bitmap.btmp_bytes_len = sb_buf->inode_bitmap_sects * SECTOR_SIZE;
+        // 从硬盘上读入
+        ide_read(hd, sb_buf->inode_table_lba, cur_part->inode_bitmap.bits, sb_buf->inode_bitmap_sects);
+
+
+        // 初始化 "已打开inode链表"
+        list_init(&cur_part->open_inodes);
+        printk("mount %s done!\n", part->name);
+
+        // 挂载成功 返回true
+        return true;
+
+    }
+    // 名字不对，返回false
+    return false;
+}
+
 /**
  * 在磁盘上搜索文件系统，若没有则格式化分区创建文件系统
  */
@@ -213,4 +272,8 @@ void file_sys_init() {
     }
     // 释放超级块缓冲区
     sys_free(sb_buf);
+
+    // 默认挂载sdb1分区
+    char default_part[8] = "sdb1";
+    list_traversal(&partition_list, mount_partition, (int)default_part);
 }

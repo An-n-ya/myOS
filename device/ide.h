@@ -13,7 +13,7 @@
 struct partition {
     uint32_t start_lba;                 // 起始扇区
     uint32_t sec_cnt;                   // 扇区数
-        struct disk* my_disk;               //分区所属硬盘
+    struct disk* my_disk;               //分区所属硬盘
     struct list_elem part_tag;          // 用于队列中的标记
     char name[8];                       // 分区名称
     struct super_block* sb;             // 分区超级块
